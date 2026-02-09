@@ -1,0 +1,2 @@
+db.url=jdbc:mysql://localhost:3306/zona_fit_db
+# This is where the environment variable is configured
