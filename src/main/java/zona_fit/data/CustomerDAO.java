@@ -46,11 +46,37 @@ public class CustomerDAO implements ICustomerDAO {
 
     @Override
     public boolean findByIdCustomer(Customer customer) {
+        PreparedStatement preparedStatement;
+        ResultSet resultSet;
+        Connection newConnection = getConnection();
+        String sqlScript = "SELECT id, nombre, apellido, membresia FROM cliente  WHERE id = ?";
+        try {
+            preparedStatement = newConnection.prepareStatement(sqlScript);
+            preparedStatement.setInt(1, customer.getId());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                customer.setName(resultSet.getString("nombre"));
+                customer.setLastName(resultSet.getString("apellido"));
+                customer.setMembership(resultSet.getInt("membresia"));
+                return true;
+            }
+
+        } catch (Exception e) {
+            log.info("Error al recupear cliente por id: " + e.getMessage());
+        }
+        finally {
+            try {
+                newConnection.close();
+            }catch (Exception e){
+                log.info("Error al cerrar la conexion" + e.getMessage());
+            }
+        }
         return false;
     }
 
     @Override
     public boolean addCustomer(Customer customer) {
+
         return false;
     }
 
@@ -64,12 +90,24 @@ public class CustomerDAO implements ICustomerDAO {
         return false;
     }
 
-    /* prueba local
-    public static void main(String[] args) {
-        System.out.println("**** prueba local ****");
-
+    /* prueba local*/
+          /* public static void main(String[] args) {
         ICustomerDAO customerDAO = new CustomerDAO();
+
+        System.out.println("**** prueba local ****");
         var customers = customerDAO.listCustomer();
+        ICustomerDAO customerDAO = new CustomerDAO();
+
         customers.forEach(System.out::println);
+
+        System.out.println("**** prueba local ****");
+        Customer customer =  new Customer(4);
+        System.out.println("Cliente antes de la busqeuda: " + customer);
+        Boolean findOk = customerDAO.findByIdCustomer(customer);
+        if(findOk)
+            System.out.println("Cliente ok: " + customer);
+        else
+            System.out.println("cliente no encontrado: " + customer.getId());
+
     }*/
 }
