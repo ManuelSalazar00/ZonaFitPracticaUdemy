@@ -6,7 +6,7 @@ public class Customer {
     private int id;
     private String name;
     private String lastName;
-    private String membership;
+    private int membership;
 
     public Customer() {
     }
@@ -15,13 +15,13 @@ public class Customer {
         this.id = id;
     }
 
-    public Customer(String name, String lastName, String membership) {
+    public Customer(String name, String lastName, int membership) {
         this.name = name;
         this.lastName = lastName;
         this.membership = membership;
     }
 
-    public Customer(int id, String name, String lastName, String membership) {
+    public Customer(int id, String name, String lastName, int membership) {
         this(name, lastName, membership);
         this.id = id;
     }
@@ -50,11 +50,11 @@ public class Customer {
         this.lastName = lastName;
     }
 
-    public String getMembership() {
+    public int getMembership() {
         return membership;
     }
 
-    public void setMembership(String membership) {
+    public void setMembership(int membership) {
         this.membership = membership;
     }
 
