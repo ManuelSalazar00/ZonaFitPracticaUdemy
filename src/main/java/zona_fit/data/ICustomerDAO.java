@@ -9,7 +9,7 @@ public interface ICustomerDAO {
 
     boolean findByIdCustomer(Customer customer);
 
-    boolean addCustomer(Customer customer);
+    boolean saveCustomer(Customer customer);
 
     boolean updateCustomer(Customer customer);
 

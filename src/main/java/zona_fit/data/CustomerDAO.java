@@ -74,7 +74,7 @@ public class CustomerDAO implements ICustomerDAO {
     }
 
     @Override
-    public boolean addCustomer(Customer customer) {
+    public boolean saveCustomer(Customer customer) {
         PreparedStatement preparedStatement;
         Connection newConection = getConnection();
         String sqlScript = "INSERT INTO cliente (nombre, apellido, membresia ) "
@@ -102,21 +102,59 @@ public class CustomerDAO implements ICustomerDAO {
 
     @Override
     public boolean updateCustomer(Customer customer) {
+        PreparedStatement preparedStatement;
+        Connection newConnection = getConnection();
+        String sqlScript = "UPDATE cliente SET nombre=?, apellido=?, membresia=? " +
+                " WHERE id = ?";
+        try {
+            preparedStatement = newConnection.prepareStatement(sqlScript);
+            preparedStatement.setString(1, customer.getName());
+            preparedStatement.setString(2, customer.getLastName());
+            preparedStatement.setInt(3, customer.getMembership());
+            preparedStatement.setInt(4, customer.getId());
+            preparedStatement.execute();
+            return true;
+        } catch (Exception e) {
+            log.info("Error al actulizzar datos de cliente" + e.getMessage());
+        } finally {
+            try {
+                newConnection.close();
+            } catch (Exception e) {
+                log.info("Error al cerrar la conexion" + e.getMessage());
+            }
+        }
         return false;
     }
 
     @Override
     public boolean deleteCustomer(Customer customer) {
+        PreparedStatement preparedStatement;
+        Connection newConnection = getConnection();
+        String sqlScript = "DELETE FROM cliente WHERE id = ?";
+        try {
+            preparedStatement = newConnection.prepareStatement(sqlScript);
+            preparedStatement.setInt(1, customer.getId());
+            preparedStatement.execute();
+            return true;
+
+        } catch (Exception e) {
+            log.info("Error al eliminar datos de cliente" + e.getMessage());
+        } finally {
+            try {
+
+            } catch (Exception e) {
+                log.info("Error al cerrar la conexion" + e.getMessage());
+            }
+        }
         return false;
     }
 
 
-
     /* prueba local*/
-        public static void main(String[] args) {
+    public static void main(String[] args) {
         ICustomerDAO customerDAO = new CustomerDAO();
 
-      System.out.println("**** prueba local ****");
+        System.out.println("**** prueba local ****");
            /*
         var customers = customerDAO.listCustomer();
         customers.forEach(System.out::println);
@@ -140,8 +178,28 @@ public class CustomerDAO implements ICustomerDAO {
 
             System.out.println("\n mostar clientes: ");
             var customers = customerDAO.listCustomer();
-            customers.forEach(System.out::println);*/
+            customers.forEach(System.out::println);
+        Customer customerUpdate = new Customer(2,"Emanuel ", "Muños ", 306);
+        Boolean updateOk = customerDAO.updateCustomer(customerUpdate);
+        if(updateOk)
+            System.out.println("cliente modificado; " + customerUpdate);
+        else
+            System.out.println("cliente no modificado" + customerUpdate);
 
+        System.out.println("\n mostar clientes: ");
+        var customers = customerDAO.listCustomer();
+        customers.forEach(System.out::println);
 
+        Customer customer =  new Customer(11);
+        Boolean deleteOk = customerDAO.deleteCustomer(customer);
+        if(deleteOk)
+            System.out.println("cliente eliminado; " + customer);
+        else
+            System.out.println("cliente no se pudo eliminar" + customer);
+
+        System.out.println("\n mostar clientes: ");
+        var customers = customerDAO.listCustomer();
+        customers.forEach(System.out::println);
+*/
     }
 }
