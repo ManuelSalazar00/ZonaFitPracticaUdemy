@@ -63,11 +63,10 @@ public class CustomerDAO implements ICustomerDAO {
 
         } catch (Exception e) {
             log.info("Error al recupear cliente por id: " + e.getMessage());
-        }
-        finally {
+        } finally {
             try {
                 newConnection.close();
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.info("Error al cerrar la conexion" + e.getMessage());
             }
         }
@@ -76,6 +75,27 @@ public class CustomerDAO implements ICustomerDAO {
 
     @Override
     public boolean addCustomer(Customer customer) {
+        PreparedStatement preparedStatement;
+        Connection newConection = getConnection();
+        String sqlScript = "INSERT INTO cliente (nombre, apellido, membresia ) "
+                + " VALUES  (?, ?, ?);";
+        try {
+            preparedStatement = newConection.prepareStatement(sqlScript);
+            preparedStatement.setString(1, customer.getName());
+            preparedStatement.setString(2, customer.getLastName());
+            preparedStatement.setInt(3, customer.getMembership());
+            preparedStatement.execute();
+            return true;
+
+        } catch (Exception e) {
+            log.info("Error al cargar cliente" + e.getMessage());
+        } finally {
+            try {
+                newConection.close();
+            } catch (Exception e) {
+                log.info("Error al cerrar la conexion" + e.getMessage());
+            }
+        }
 
         return false;
     }
@@ -90,14 +110,15 @@ public class CustomerDAO implements ICustomerDAO {
         return false;
     }
 
+
+
     /* prueba local*/
-          /* public static void main(String[] args) {
+        public static void main(String[] args) {
         ICustomerDAO customerDAO = new CustomerDAO();
 
-        System.out.println("**** prueba local ****");
+      System.out.println("**** prueba local ****");
+           /*
         var customers = customerDAO.listCustomer();
-        ICustomerDAO customerDAO = new CustomerDAO();
-
         customers.forEach(System.out::println);
 
         System.out.println("**** prueba local ****");
@@ -109,5 +130,18 @@ public class CustomerDAO implements ICustomerDAO {
         else
             System.out.println("cliente no encontrado: " + customer.getId());
 
-    }*/
+            Customer customerNew = new Customer("Manuel ", "Cardenas ", 289);
+            System.out.println("Cliente antes de la busqeuda: " + customerNew);
+            Boolean createOk = customerDAO.addCustomer(customerNew);
+            if(createOk)
+                System.out.println("cliente agreado; " + customerNew);
+            else
+                System.out.println("cliente nm agregado" + customerNew);
+
+            System.out.println("\n mostar clientes: ");
+            var customers = customerDAO.listCustomer();
+            customers.forEach(System.out::println);*/
+
+
+    }
 }
