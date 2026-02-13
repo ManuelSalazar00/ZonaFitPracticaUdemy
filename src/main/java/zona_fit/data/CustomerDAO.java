@@ -1,18 +1,20 @@
 package zona_fit.data;
 
 import zona_fit.domain.Customer;
+import zona_fit.exceptions.DatabaseException;
 
 import static zona_fit.connection.ConnectionJdbc.getConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class CustomerDAO implements ICustomerDAO {
 
-    Logger log = Logger.getLogger(getClass().getName());
+    private static final Logger log = LoggerFactory.getLogger(CustomerDAO.class);
 
     @Override
     public List<Customer> listCustomer() {
@@ -32,8 +34,8 @@ public class CustomerDAO implements ICustomerDAO {
                 customer.setMembership(resultSet.getInt("membresia"));
                 customers.add(customer);
             }
-        } catch (Exception e) {
-            log.info("Error al listar los clientes" + e.getMessage());
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al listar todos los clientes: ", e);
         } finally {
             try {
                 newConnection.close();
@@ -61,8 +63,8 @@ public class CustomerDAO implements ICustomerDAO {
                 return true;
             }
 
-        } catch (Exception e) {
-            log.info("Error al recupear cliente por id: " + e.getMessage());
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al recupear cliente por id: ", e);
         } finally {
             try {
                 newConnection.close();
@@ -87,8 +89,8 @@ public class CustomerDAO implements ICustomerDAO {
             preparedStatement.execute();
             return true;
 
-        } catch (Exception e) {
-            log.info("Error al cargar cliente" + e.getMessage());
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al crea nuevo cliente: ", e);
         } finally {
             try {
                 newConection.close();
@@ -97,7 +99,6 @@ public class CustomerDAO implements ICustomerDAO {
             }
         }
 
-        return false;
     }
 
     @Override
@@ -114,8 +115,8 @@ public class CustomerDAO implements ICustomerDAO {
             preparedStatement.setInt(4, customer.getId());
             preparedStatement.execute();
             return true;
-        } catch (Exception e) {
-            log.info("Error al actulizzar datos de cliente" + e.getMessage());
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al modificar los datos de cliente: ", e);
         } finally {
             try {
                 newConnection.close();
@@ -123,7 +124,6 @@ public class CustomerDAO implements ICustomerDAO {
                 log.info("Error al cerrar la conexion" + e.getMessage());
             }
         }
-        return false;
     }
 
     @Override
@@ -137,8 +137,8 @@ public class CustomerDAO implements ICustomerDAO {
             preparedStatement.execute();
             return true;
 
-        } catch (Exception e) {
-            log.info("Error al eliminar datos de cliente" + e.getMessage());
+        } catch (SQLException e) {
+            throw new DatabaseException("Error al eliminar datos de cliente: ", e);
         } finally {
             try {
 
@@ -146,7 +146,6 @@ public class CustomerDAO implements ICustomerDAO {
                 log.info("Error al cerrar la conexion" + e.getMessage());
             }
         }
-        return false;
     }
 
 }
