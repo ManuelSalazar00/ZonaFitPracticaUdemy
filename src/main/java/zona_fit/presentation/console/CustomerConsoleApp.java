@@ -54,7 +54,7 @@ public class CustomerConsoleApp {
         System.out.println("------------ Menu ----------");
         System.out.println(UserFrames.displayOutputSubTitles("" +
                 "# 1. Listar todos los clientes. \n" +
-                "# 2. Listar todos los clientes. \n" +
+                "# 2. Buscar cliente por id. \n" +
                 "# 3. Agregar cliente. \n" +
                 "# 4. Modificar cliente.\n" +
                 "# 5. Eliminar cliente.\n" +
