@@ -3,7 +3,7 @@ package zona_fit.domain;
 import java.util.Objects;
 
 public class Customer {
-    private int id;
+    private long id;
     private String name;
     private String lastName;
     private int membership;
@@ -11,7 +11,7 @@ public class Customer {
     public Customer() {
     }
 
-    public Customer(int id) {
+    public Customer(long id) {
         this.id = id;
     }
 
@@ -26,11 +26,11 @@ public class Customer {
         this.id = id;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

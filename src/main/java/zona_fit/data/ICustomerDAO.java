@@ -3,11 +3,12 @@ package zona_fit.data;
 import zona_fit.domain.Customer;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ICustomerDAO {
     List<Customer> listCustomer();
 
-    boolean findByIdCustomer(Customer customer);
+    Optional<Customer> findByIdCustomer(Long id);
 
     boolean saveCustomer(Customer customer);
 
