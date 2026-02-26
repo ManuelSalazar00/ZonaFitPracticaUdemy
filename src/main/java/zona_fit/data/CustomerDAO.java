@@ -8,6 +8,7 @@ import static zona_fit.connection.ConnectionJdbc.getConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CustomerDAO implements ICustomerDAO {
 
@@ -33,25 +34,28 @@ public class CustomerDAO implements ICustomerDAO {
     }
 
     @Override
-    public boolean findByIdCustomer(Customer customer) {
+    public Optional<Customer> findByIdCustomer(Long id) {
         String sqlScript = "SELECT id, nombre, apellido, membresia FROM cliente  WHERE id = ?";
         try (Connection newConnection = getConnection();
              PreparedStatement preparedStatement = newConnection.prepareStatement(sqlScript)) {
 
-            preparedStatement.setInt(1, customer.getId());
+            preparedStatement.setLong(1, id);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
+
                 if (resultSet.next()) {
+                    Customer customer = new Customer();
+                    customer.setId(resultSet.getInt("id"));
                     customer.setName(resultSet.getString("nombre"));
                     customer.setLastName(resultSet.getString("apellido"));
                     customer.setMembership(resultSet.getInt("membresia"));
-                    return true;
+                    return Optional.of(customer);
                 }
             }
         } catch (SQLException e) {
             throw new DatabaseException("Error al recupear cliente por id: ", e);
         }
-        return false;
+        return Optional.empty();
     }
 
     @Override
@@ -69,7 +73,6 @@ public class CustomerDAO implements ICustomerDAO {
         } catch (SQLException e) {
             throw new DatabaseException("Error al crea nuevo cliente: ", e);
         }
-
     }
 
     @Override
@@ -81,7 +84,7 @@ public class CustomerDAO implements ICustomerDAO {
             preparedStatement.setString(1, customer.getName());
             preparedStatement.setString(2, customer.getLastName());
             preparedStatement.setInt(3, customer.getMembership());
-            preparedStatement.setInt(4, customer.getId());
+            preparedStatement.setLong(4, customer.getId());
 
             int rowsAffected = preparedStatement.executeUpdate();
             return rowsAffected > 0;
@@ -95,7 +98,7 @@ public class CustomerDAO implements ICustomerDAO {
         String sqlScript = "DELETE FROM cliente WHERE id = ?";
         try (Connection newConnection = getConnection();
              PreparedStatement preparedStatement = newConnection.prepareStatement(sqlScript)) {
-            preparedStatement.setInt(1, customer.getId());
+            preparedStatement.setLong(1, customer.getId());
 
             int rowsAffected = preparedStatement.executeUpdate();
             return rowsAffected > 0;
