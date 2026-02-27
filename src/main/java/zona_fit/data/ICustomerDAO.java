@@ -10,10 +10,10 @@ public interface ICustomerDAO {
 
     Optional<Customer> findByIdCustomer(Long id);
 
-    boolean saveCustomer(Customer customer);
+    Customer saveCustomer(Customer customer);
 
-    boolean updateCustomer(Customer customer);
+    Customer updateCustomer(Customer customer);
 
-    boolean deleteCustomer(Customer customer);
+    void deleteCustomer(Customer customer);
 
 }
