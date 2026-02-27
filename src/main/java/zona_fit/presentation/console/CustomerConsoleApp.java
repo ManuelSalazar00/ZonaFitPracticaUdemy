@@ -5,141 +5,109 @@ import zona_fit.data.CustomerDAO;
 import zona_fit.data.ICustomerDAO;
 import zona_fit.domain.Customer;
 import zona_fit.utilities.UserFrames;
+import zona_fit.service.CustomerService;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.Optional;
 
 public class CustomerConsoleApp {
     Scanner scanner = new Scanner(System.in);
+    private final CustomerService customerService;
+
+    public CustomerConsoleApp() {
+        ICustomerDAO customerDAO = new CustomerDAO();
+        this.customerService = new CustomerService(customerDAO);
+    }
 
     public static void main(String[] args) {
-        ICustomerDAO customerDAO = new CustomerDAO();
         CustomerConsoleApp consoleApp = new CustomerConsoleApp();
-        Customer customer;
 
         final int NUMBER_OPTIONS_MAX = 6;
         int option = 0;
         while (option != NUMBER_OPTIONS_MAX) {
             consoleApp.showMenu();
-            option = consoleApp.scanner.nextInt();
+            option = Integer.parseInt(consoleApp.scanner.nextLine());
+
 
             switch (option) {
-                case 1:
-                    consoleApp.allCustomers(customerDAO);
-                    break;
-                case 2:
-                    consoleApp.findByIdCustomer(customerDAO);
-                    break;
-                case 3:
-                    consoleApp.saveCustomer(customerDAO);
-                    break;
-                case 4:
-                    consoleApp.updateCustomer(customerDAO);
-                    break;
-                case 5:
-                    consoleApp.deleteCustomer(customerDAO);
-                    break;
-                case 6:
-                    consoleApp.showMessageExitApplication();
-                    break;
-                default:
-                    System.out.println(UserFrames.displayOutputSubTitles("Opcion invalida, Gracias por usar el servicio"));
-                    break;
-
+                case 1 -> consoleApp.allCustomers();
+                case 2 -> consoleApp.findByIdCustomer();
+                case 3 -> consoleApp.saveCustomer();
+                case 4 -> consoleApp.updateCustomer();
+                case 5 -> consoleApp.deleteCustomer();
+                case 6 -> consoleApp.showMessageExitApplication();
+                default ->
+                        System.out.println(UserFrames.displayOutputSubTitles("Opcion invalida, Gracias por usar el servicio"));
             }
         }
     }
 
     public void showMenu() {
         System.out.println("------------ Menu ----------");
-        System.out.println(UserFrames.displayOutputSubTitles("" +
-                "# 1. Listar todos los clientes. \n" +
-                "# 2. Buscar cliente por id. \n" +
-                "# 3. Agregar cliente. \n" +
-                "# 4. Modificar cliente.\n" +
-                "# 5. Eliminar cliente.\n" +
-                "# 6. Salir \n"));
+        System.out.println(UserFrames.displayOutputSubTitles(
+                """
+                        # 1. Listar todos los clientes.\s
+                        # 2. Buscar cliente por id.\s
+                        # 3. Agregar cliente.\s
+                        # 4. Modificar cliente.\s
+                        # 5. Eliminar cliente.\s
+                        # 6. Salir\s
+                        """));
         System.out.print("digite una opcion : ");
     }
 
-    public List<Customer> allCustomers(ICustomerDAO customerDAO) {
-        List<Customer> customers = customerDAO.listCustomer();
-        customers.forEach(System.out::println);
-        return customers;
+    public void allCustomers() {
+        List<Customer> customers = customerService.getAllCustomers();
+        if (!customers.isEmpty()) {
+            customers.forEach(System.out::println);
+        } else {
+            System.out.println("No hay clientes registrados.");
+        }
     }
 
-    public boolean findByIdCustomer(ICustomerDAO customerDAO) {
+    public void findByIdCustomer() {
         System.out.print("ingrese el id del cliente: ");
-        int numberIdentityCustomer = scanner.nextInt();
-        scanner.nextLine();
-        Customer customer = new Customer(numberIdentityCustomer);
-        Boolean findCustomerById = customerDAO.findByIdCustomer(customer);
-        if (findCustomerById == true) {
-            System.out.println("Cliente encontrado: " + customer);
+        long numberIdentityCustomer = Long.parseLong(scanner.nextLine());
+        Optional<Customer> customer = customerService.getFindByIdCustomer(numberIdentityCustomer);
+        if (customer.isPresent()) {
+            System.out.println("Cliente encontrado: " + customer.get());
         } else {
-            System.out.println("Cliente no encontrado: " + customer.getId());
+            System.out.println("Cliente no encontrado");
         }
-        return false;
     }
 
-    public boolean saveCustomer(ICustomerDAO customerDAO) {
-        System.out.println("ingrese el nombre: ");
-        String inputName = scanner.nextLine();
-        scanner.nextLine();
-        System.out.println("ingrese el apellido: ");
-        String inputLastName = scanner.nextLine();
-        scanner.nextLine();
-        System.out.println("ingrese el valor de la mebresia: ");
-        int inputMembership = scanner.nextInt();
-        scanner.nextLine();
-        Customer customerNew = new Customer(inputName, inputLastName, inputMembership);
-        System.out.println("Cliente antes de la busqeuda: " + customerNew);
-        Boolean save = customerDAO.saveCustomer(customerNew);
-        if (save) {
-            System.out.println("cliente agreado; " + customerNew + "\n");
-            System.out.println(UserFrames.displayOutputSubTitles(""));
-            allCustomers(customerDAO);
-        } else {
-            System.out.println("EL cliente no pudo ser agregado" + customerNew);
-        }
-        return false;
-    }
-
-    public boolean updateCustomer(ICustomerDAO customerDAO) {
-        System.out.print("ingrese el id del cliente a modficar: ");
-        int numberIdentityCustomer = scanner.nextInt();
-        scanner.nextLine();
+    public void saveCustomer() {
         System.out.print("ingrese el nombre: ");
         String inputName = scanner.nextLine();
         System.out.print("ingrese el apellido: ");
         String inputLastName = scanner.nextLine();
         System.out.print("ingrese el valor de la mebresia: ");
-        int inputMembership = scanner.nextInt();
-        scanner.nextLine();
-        Customer customerUpdate = new Customer(numberIdentityCustomer, inputName, inputLastName, inputMembership);
-        Boolean updateCustomer = customerDAO.updateCustomer(customerUpdate);
-        if (updateCustomer) {
-            System.out.println("El cliente fue modificado; " + customerUpdate);
-            System.out.println(UserFrames.displayOutputSubTitles(""));
-            allCustomers(customerDAO);
-        } else
-            System.out.println("El cliente no puedo ser modificado" + customerUpdate);
-        return false;
+        int inputMembership = Integer.parseInt(scanner.nextLine());
+        Customer saved = customerService.saveCustomer(inputName, inputLastName, inputMembership);
+        System.out.println("Cliente creado de manera exitosa: " + saved);
     }
 
-    public boolean deleteCustomer(ICustomerDAO customerDAO) {
+    public void updateCustomer() {
+        System.out.print("ingrese el id del cliente a modficar: ");
+        int numberIdentityCustomer = Integer.parseInt(scanner.nextLine());
+        System.out.print("ingrese el nombre: ");
+        String inputName = scanner.nextLine();
+        System.out.print("ingrese el apellido: ");
+        String inputLastName = scanner.nextLine();
+        System.out.print("ingrese el valor de la mebresia: ");
+        int inputMembership = Integer.parseInt(scanner.nextLine());
+        Customer customerUpdate = customerService.updateCustomer (numberIdentityCustomer, inputName, inputLastName
+                , inputMembership);
+        System.out.println("Cliente actuliazdo con exito: " + customerUpdate);
+    }
+
+    public void deleteCustomer() {
         System.out.print("ingrese el id del cliente: ");
-        int numberIdentityCustomer = scanner.nextInt();
+        long numberIdentityCustomer = scanner.nextLong();
         scanner.nextLine();
-        Customer customer = new Customer(numberIdentityCustomer);
-        Boolean deleteCustomer = customerDAO.deleteCustomer(customer);
-        if (deleteCustomer) {
-            System.out.println("cliente eliminado; " + customer);
-            System.out.println(UserFrames.displayOutputSubTitles(""));
-            allCustomers(customerDAO);
-        } else
-            System.out.println("cliente no se pudo eliminar" + customer);
-        return false;
+        customerService.deleteCustomer(numberIdentityCustomer);
+        System.out.println("Cliente con el id: " + numberIdentityCustomer  + " fue elemindado con exito: ");
     }
 
     public void showMessageExitApplication() {

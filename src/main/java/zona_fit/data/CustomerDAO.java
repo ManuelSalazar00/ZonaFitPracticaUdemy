@@ -59,49 +59,67 @@ public class CustomerDAO implements ICustomerDAO {
     }
 
     @Override
-    public boolean saveCustomer(Customer customer) {
+    public Customer saveCustomer(Customer customer) {
         String sqlScript = "INSERT INTO cliente (nombre, apellido, membresia ) "
                 + " VALUES  (?, ?, ?);";
         try (Connection newConnection = getConnection();
-             PreparedStatement preparedStatement = newConnection.prepareStatement(sqlScript)) {
+             PreparedStatement preparedStatement = newConnection.prepareStatement(sqlScript
+                     , Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, customer.getName());
             preparedStatement.setString(2, customer.getLastName());
             preparedStatement.setInt(3, customer.getMembership());
 
             int rowsAffected = preparedStatement.executeUpdate();
-            return rowsAffected > 0;
+            if (rowsAffected > 0) {
+                try (ResultSet generateKeys = preparedStatement.getGeneratedKeys()) {
+                    if (generateKeys.next()) {
+                        customer.setId(generateKeys.getLong(1));
+                    }
+                }
+                return customer;
+            } else {
+                throw new DatabaseException("No se pudo insertar cliente");
+            }
         } catch (SQLException e) {
             throw new DatabaseException("Error al crea nuevo cliente: ", e);
         }
     }
 
     @Override
-    public boolean updateCustomer(Customer customer) {
+    public Customer updateCustomer(Customer customer) {
         String sqlScript = "UPDATE cliente SET nombre=?, apellido=?, membresia=? " +
                 " WHERE id = ?";
         try (Connection newConnection = getConnection();
              PreparedStatement preparedStatement = newConnection.prepareStatement(sqlScript)) {
+
             preparedStatement.setString(1, customer.getName());
             preparedStatement.setString(2, customer.getLastName());
             preparedStatement.setInt(3, customer.getMembership());
             preparedStatement.setLong(4, customer.getId());
 
             int rowsAffected = preparedStatement.executeUpdate();
-            return rowsAffected > 0;
+
+            if (rowsAffected == 0)
+                throw new DatabaseException("No se encontro el cleinte con id: " + customer.getId());
+
+            return customer;
+
         } catch (SQLException e) {
             throw new DatabaseException("Error al modificar los datos de cliente: ", e);
         }
     }
 
     @Override
-    public boolean deleteCustomer(Customer customer) {
+    public void deleteCustomer(Customer customer) {
         String sqlScript = "DELETE FROM cliente WHERE id = ?";
         try (Connection newConnection = getConnection();
              PreparedStatement preparedStatement = newConnection.prepareStatement(sqlScript)) {
             preparedStatement.setLong(1, customer.getId());
 
             int rowsAffected = preparedStatement.executeUpdate();
-            return rowsAffected > 0;
+
+            if (rowsAffected == 0)
+                throw new DatabaseException("No se encontro el cleinte con id: " + customer.getId());
 
         } catch (SQLException e) {
             throw new DatabaseException("Error al eliminar datos de cliente: ", e);
